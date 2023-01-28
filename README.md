@@ -96,9 +96,11 @@ IDViewController를 구현하면서, User에 맞게 변화하는 플로우를 �
 </details>
 
 <details>
-<summary>효원</summary>
+<summary>도현</summary>
 <div markdown="1">
-
+## 학생증 OCR 개발기
+- [CaptureSession 세팅하기](https://guttural-tumble-39b.notion.site/CaptureSession-9c0a434b5f5a438c823f20d1ae08b15b)
+- [OCR을 위한 Keyneez Custom PreviewView 구현하기](https://guttural-tumble-39b.notion.site/OCR-Custom-PreviewView-cc93a01250b94a0581f191fc822a40d1)
 iOS기기 Camera I/O가 될떄, Camera buffer 에 존재하는 프레임을 기반으로 자동OCR 기능 구현, 프레임 기반으로 들어오는 camerabuffer의 값을 원하는 사진 크기로 자르는 것, 수동OCR 기능 구현이 어려웠습니다. 카메라 버퍼에서 들어오는 프레임의 크기와 현재 휴대폰화면의 크기를 비교하고, 비례대로 잘랐습니다. 자른 것은 OCR을 활용해서 필요한 정보를 추출합니다. 
 
 또한 카메라는 백그라운드 스레드에서 동작하는데, 해당 카메라 i/o동작과 사진 프로세싱하는 것을 스레드를 나눠야합니다. 따라서 사진 프로세싱하는 동작과 카메라 I/O를 나누면서 프로세싱할때, 카메라 I/O을 block했습니다. 사진 프로세싱하는 버퍼가 다 차면 카메라 블럭시키는 과정을 DispatchSemaphore을 사용해서 블럭시켰습니다.
