@@ -75,6 +75,10 @@ final class Camera {
     checkCameraAuthroizationStatus()
   }
   
+  deinit {
+    lastFrame = nil
+  }
+  
   func configure(completionWhenAddInput: @escaping () -> Void) {
     sessionQueue.async {
       self.configureSession(completionWhenAddInput: completionWhenAddInput)
@@ -260,41 +264,12 @@ extension Camera {
       
       photoSettings.flashMode = .off
       
-      photoSettings.isDepthDataDeliveryEnabled = (self.depthDataDeliveryMode == .on
-                                                  && self.photoOutput.isDepthDataDeliveryEnabled)
-      
-      photoSettings.isPortraitEffectsMatteDeliveryEnabled = (self.portraitEffectsMatteDeliveryMode == .on
-                                                             && self.photoOutput.isPortraitEffectsMatteDeliveryEnabled)
-      
-      if photoSettings.isDepthDataDeliveryEnabled {
-        if !self.photoOutput.availableSemanticSegmentationMatteTypes.isEmpty {
-        }
-      }
-      
       photoSettings.photoQualityPrioritization = self.photoQualityPrioritizationMode
       
       let photoCaptureProcessor = PhotoCaptureProcessor(with: photoSettings,
                                                         willCapturePhotoAnimation: { },
                                                         livePhotoCaptureHandler: { capturing in
-        self.sessionQueue.async {
-          if capturing {
-            self.inProgressLivePhotoCapturesCount += 1
-          } else {
-            self.inProgressLivePhotoCapturesCount -= 1
-          }
-          
-          let inProgressLivePhotoCapturesCount = self.inProgressLivePhotoCapturesCount
-          DispatchQueue.main.async {
-            if inProgressLivePhotoCapturesCount > 0 {
-//              self.capturingLivePhotoLabel.isHidden = false
-            } else if inProgressLivePhotoCapturesCount == 0 {
-//              self.capturingLivePhotoLabel.isHidden = true
-            } else {
-              print("Error: In progress Live Photo capture count is less than 0.")
-            }
-          }
-        }
-      }, completionHandler: { photoCaptureProcessor in
+  }, completionHandler: { photoCaptureProcessor in
         // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
         self.sessionQueue.async {
           self.inProgressPhotoCaptureDelegates[photoCaptureProcessor.requestedPhotoSettings.uniqueID] = nil

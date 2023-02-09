@@ -24,6 +24,7 @@ final class OCRService: TextRecognizable {
   var semaphore: DispatchSemaphore
   var textBuffer: [[String]] = []
   var imageBuffer: [UIImage] = []
+  var bufferQueue = DispatchQueue(label: "textQueue", attributes: .concurrent)
   
   init() {
     self.semaphore = DispatchSemaphore(value: bufferLength)
@@ -52,9 +53,9 @@ final class OCRService: TextRecognizable {
       if bufferHasSurplusSpace() {
         let splited = recognizedText.text.components(separatedBy: ["\n", ":", "."]).map { String($0)}
         let regexed = regexIDCard(with: splited)
-        append(text: regexed, image: uiimage)
+        appendIntoSharedBuffer(text: regexed, image: uiimage)
       } else {
-        checkOCRSuccess(completion: completion) { [weak self] in
+        checkOCRSuccess(success: completion) { [weak self] in
           self?.flush()
         }
       }
@@ -67,16 +68,20 @@ final class OCRService: TextRecognizable {
     return textBuffer.count < bufferLength - 1 && imageBuffer.count < bufferLength - 1
   }
   
-  private func append(text: [String], image: UIImage) {
-    appendTextsInTextBuffer(with: text)
-    appendImageInImageBuffer(with: image)
+  private func appendIntoSharedBuffer(text: [String], image: UIImage) {
+    bufferQueue.async(flags: .barrier) {
+      self.appendTextsInTextBuffer(with: text)
+      self.appendImageInImageBuffer(with: image)
+    }
   }
   
   func flush() {
-    imageBuffer.removeAll()
-    textBuffer.removeAll()
-    for _ in 0..<bufferLength {
-      semaphore.signal()
+    bufferQueue.async(flags: .barrier) {
+      self.imageBuffer.removeAll()
+      self.textBuffer.removeAll()
+      for _ in 0..<self.bufferLength {
+        self.semaphore.signal()
+      }
     }
   }
   
@@ -88,7 +93,7 @@ final class OCRService: TextRecognizable {
     self.textBuffer.append(text)
   }
   
-  private func checkOCRSuccess(completion: @escaping ([String], UIImage) -> Void, failure: @escaping () -> Void) {
+  private func checkOCRSuccess(success: @escaping ([String], UIImage) -> Void, completion: @escaping () -> Void) {
     
     
     var textDict: [String:Int] = [:]
@@ -101,21 +106,24 @@ final class OCRService: TextRecognizable {
     // 2개 미만일 경우 Flush
     var newArr = sortedArr.map { $0.key }
     if newArr.count < 2 {
-      failure()
+      completion()
       return
     }
     // 2개일 경우,
     if newArr.count < 3 {
       newArr.append("")
     }
-
+    
     newArr = Array(newArr[0..<3])
+  
     if checkTeenID(in: newArr) || checkSchool(in: newArr) {
-      completion(newArr, imageBuffer[5])
-      failure()
+      bufferQueue.sync {
+        success(newArr, imageBuffer[5])
+      }
+      completion()
       return
     }
-    failure()
+    completion()
   }
   
   private func checkTeenID(in arr: [String]) -> Bool {

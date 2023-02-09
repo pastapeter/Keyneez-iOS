@@ -280,17 +280,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     camera.lastFrame = sampleBuffer
     let ciimage = convert(sampleBuffer)
     let tempImage = UIImage(ciImage: ciimage)
-    
-    let deviceScreen = UIScreen.main.bounds.size
-    let newImage = UIImage(cgImage: resizeImage(image: tempImage, size: tempImage.size))
-    let newx = regionOfInterestSize.origin.x / deviceScreen.height * tempImage.size.height
-    let newy = regionOfInterestSize.origin.y / deviceScreen.height * tempImage.size.height
-    let newHeight = regionOfInterestSize.height / deviceScreen.height * tempImage.size.height
-    let newWidth = newHeight * regionOfInterestSize.width / regionOfInterestSize.height
-    
-    let cropped = newImage.cgImage?.cropping(to: CGRect(x: tempImage.size.width / 2 - newWidth / 2, y: newy, width: newHeight * regionOfInterestSize.width / regionOfInterestSize.height, height: newHeight))
-    
-    let newCropped = UIImage(cgImage: cropped!, scale: newImage.scale, orientation: newImage.imageOrientation)
+    let newCropped = makeCroppedImage(image: tempImage)
     
     let visionImage = VisionImage(image: newCropped)
     let orientation = UIUtilities.imageOrientation(
@@ -310,6 +300,17 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
       guard let self else {return}
       self.processWhenSuccessOCRAuto(image: image, text: text, name: 4)
     }
+  }
+  
+  private func makeCroppedImage(image: UIImage) -> UIImage {
+    var image = UIImage(cgImage: resizeImage(image: image, size: image.size))
+    let deviceScreen = UIScreen.main.bounds.size
+    let newy = regionOfInterestSize.origin.y / deviceScreen.height * image.size.height
+    let cardHeightInPhoto = regionOfInterestSize.height / deviceScreen.height * image.size.height
+    let cardWidthInPhoto = cardHeightInPhoto * regionOfInterestSize.width / regionOfInterestSize.height
+    let newx = image.size.width / 2 - cardWidthInPhoto / 2
+    let cropped = image.cgImage?.cropping(to: CGRect(x: newx, y: newy, width: cardWidthInPhoto, height: cardHeightInPhoto))
+    return UIImage(cgImage: cropped!, scale: image.scale, orientation: image.imageOrientation)
   }
   
   func processWhenSuccessOCRAuto(image: UIImage, text: [String],  name: Int) {

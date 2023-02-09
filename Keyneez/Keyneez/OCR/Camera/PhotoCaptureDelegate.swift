@@ -59,17 +59,8 @@ class PhotoCaptureProcessor: NSObject {
   }
   
   private func didFinish() {
-    if let livePhotoCompanionMoviePath = livePhotoCompanionMovieURL?.path {
-      if FileManager.default.fileExists(atPath: livePhotoCompanionMoviePath) {
-        do {
-          try FileManager.default.removeItem(atPath: livePhotoCompanionMoviePath)
-        } catch {
-          print("Could not remove file at url: \(livePhotoCompanionMoviePath)")
-        }
-      }
-    }
-    
     completionHandler(self)
+    photoData = nil
   }
 }
 
@@ -109,32 +100,50 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
       print("Error capturing photo: \(error)")
       return
     } else {
-      //      photoData = photo.fileDataRepresentation()
       guard let data = photo.fileDataRepresentation() else {return}
       guard let tempImage = UIImage(data: data) else {return}
-      
-      let deviceScreen = UIScreen.main.bounds.size
-      var newImage = UIImage(cgImage: resizeImage(image: tempImage, size: tempImage.size))
-      let newx = regionOfInterestSize.origin.x / deviceScreen.height * tempImage.size.height
-      let newy = regionOfInterestSize.origin.y / deviceScreen.height * tempImage.size.height
-      let newHeight = regionOfInterestSize.height / deviceScreen.height * tempImage.size.height
-      let newWidth = newHeight * regionOfInterestSize.width / regionOfInterestSize.height
-      var cropped = newImage.cgImage?.cropping(to: CGRect(x: tempImage.size.width / 2 - newWidth / 2, y: newy, width: newHeight * regionOfInterestSize.width / regionOfInterestSize.height, height: newHeight))
-      
-      var newCropped = UIImage(cgImage: cropped!, scale: newImage.scale, orientation: newImage.imageOrientation)
-      
+
+      var newCropped = makeCroppedImage(image: tempImage)
       photoData = newCropped.pngData()
-      
+
       DispatchQueue.global().async { [weak self] in
         guard let self = self else {return}
         let visionImage = VisionImage(image: newCropped)
         OCRService().recognizeTextWithManual(in: visionImage, with: newCropped, width: newCropped.size.width, height: newCropped.size.height) { text, image in
+          self.saveImage(image: image, name: 2)
           self.OCRCompletionHandler(text, image)
         }
-        
+
       }
     }
     
+  }
+  
+  func saveImage(image: UIImage, name: Int) -> Bool {
+          guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
+              return false
+          }
+          guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
+              return false
+          }
+          do {
+              try data.write(to: directory.appendingPathComponent("profile\(name).png")!)
+              return true
+          } catch {
+              print(error.localizedDescription)
+              return false
+          }
+      }
+  
+  private func makeCroppedImage(image: UIImage) -> UIImage {
+    var image = UIImage(cgImage: resizeImage(image: image, size: image.size))
+    let deviceScreen = UIScreen.main.bounds.size
+    let newy = regionOfInterestSize.origin.y / deviceScreen.height * image.size.height
+    let cardHeightInPhoto = regionOfInterestSize.height / deviceScreen.height * image.size.height
+    let cardWidthInPhoto = cardHeightInPhoto * regionOfInterestSize.width / regionOfInterestSize.height
+    let newx = image.size.width / 2 - cardWidthInPhoto / 2
+    let cropped = image.cgImage?.cropping(to: CGRect(x: newx, y: newy, width: cardWidthInPhoto, height: cardHeightInPhoto))
+    return UIImage(cgImage: cropped!, scale: image.scale, orientation: image.imageOrientation)
   }
   
   /// - Tag: DidFinishRecordingLive
