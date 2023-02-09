@@ -15,6 +15,16 @@ private struct TabInfo {
 }
 
 final class KeyneezTabbarController: UITabBarController {
+  
+  init(data: [HomeContentResponseDto]) {
+    self.homeContent = data
+    super.init(nibName: nil, bundle: nil)
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     assignTabbar()
@@ -22,6 +32,7 @@ final class KeyneezTabbarController: UITabBarController {
   }
   
   private let idRepository = KeyneezIDRepository()
+  private var homeContent: [HomeContentResponseDto]
 
   private func assignTabbar() {
     let tabBar = { () -> KeyneezTabar in
@@ -39,8 +50,7 @@ final class KeyneezTabbarController: UITabBarController {
 // MARK: - Setting ViewController in TabbarViewController
 extension KeyneezTabbarController {
   fileprivate func createTabbarItems() {
-    let homeViewController = HomeViewController()
-    homeViewController.viewWillAppear(true)
+    let homeViewController = HomeViewController(content: homeContent)
     let homeViewNavigationController = makeHomeNaviController(homeViewController: homeViewController)
     
     let tabInfos: [TabInfo] = [
@@ -77,7 +87,6 @@ extension KeyneezTabbarController {
   
   private func makeHomeNaviController(homeViewController: HomeViewController) -> UINavigationController {
     let nav = UINavigationController(rootViewController: homeViewController)
-    homeViewController.viewWillAppear(true)
     nav.isNavigationBarHidden = true
     nav.tabBarItem = UITabBarItem(title: "홈", image: UIImage(named: "ic_home_tabbar"), selectedImage: nil)
     return nav

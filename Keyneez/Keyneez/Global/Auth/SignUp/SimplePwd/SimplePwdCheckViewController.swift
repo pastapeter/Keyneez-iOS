@@ -96,7 +96,7 @@ class SimplePwdCheckViewController: NiblessViewController, NavigationBarProtocol
         guard let userData = self.userData else {return}
         UserSession.shared.profile = Profile(name: userData.userName, birthday: userData.userBirth, userCharacter: userData.Characters?.character, userPhoneNumber: userData.userPhone)
         DispatchQueue.main.async {
-          self.view.window?.rootViewController = KeyneezTabbarController()
+          self.view.window?.rootViewController = KeyneezTabbarController(data: [])
                   }
       case .failure(let error):
         print(error)

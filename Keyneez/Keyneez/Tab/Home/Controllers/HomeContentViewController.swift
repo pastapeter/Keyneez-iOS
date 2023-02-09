@@ -36,6 +36,7 @@ final class HomeContentViewController: UIViewController {
     super.viewDidLoad()
     register()
     setLayout()
+    recommendContentCollectionView.reloadData()
 //    floatyFilter.isHidden = true
   }
 

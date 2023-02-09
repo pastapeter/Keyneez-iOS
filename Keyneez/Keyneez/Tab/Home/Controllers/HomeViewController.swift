@@ -42,23 +42,19 @@ final class HomeViewController: NiblessViewController, NavigationBarProtocol {
     $0.backgroundColor = .gray900
   }
   
+  init(content: [HomeContentResponseDto]) {
+    super.init()
+    self.datasources.append(content)
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     setLayout()
-    addContentViews(asChildViewController: HomeContentViewController())
     addNavigationViewToSubview()
-    guard let token = UserSession.shared.accessToken else { return }
-    repository.getAllContents(token: token) {
-      [weak self] arr in
-      guard let self else {return}
-      self.datasources.append(arr)
-      DispatchQueue.main.async {
-        self.VCs.forEach {
-          $0.contentList = self.datasources[0]
-          $0.recommendContentCollectionView.reloadData()
-        }
-      }
+    self.VCs.forEach {
+      $0.contentList = self.datasources[0]
     }
+    addContentViews(asChildViewController: VCs[0])
   }
   private var repository: ContentRepository = KeyneezContentRepository()
   
@@ -67,6 +63,10 @@ final class HomeViewController: NiblessViewController, NavigationBarProtocol {
   
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
+    fetchAllContent()
+  }
+  
+  func fetchAllContent() {
     guard let token = UserSession.shared.accessToken else { return }
     repository.getAllContents(token: token) {
       [weak self] arr in
@@ -80,6 +80,7 @@ final class HomeViewController: NiblessViewController, NavigationBarProtocol {
       }
     }
   }
+  
 }
 
 // MARK: - extra functions

@@ -84,6 +84,7 @@ class SimpleLoginViewController: NiblessViewController, NavigationBarProtocol {
   }
   
   private var selectedNumber: [Int] = []
+  let repository = KeyneezContentRepository()
   
   private func loginInfo(with dto: LoginRequestDto, completion: @escaping(LoginResponseDto) -> Void) {
     UserAPIProvider.shared.postLoginInfo(param: dto) { [weak self] result in
@@ -92,8 +93,11 @@ class SimpleLoginViewController: NiblessViewController, NavigationBarProtocol {
       case .success(let data):
         guard let loginResponseDTO = data else {return}
         UserSession.shared.accessToken = loginResponseDTO.accessToken
-        DispatchQueue.main.async {
-          self.view.window?.rootViewController = KeyneezTabbarController()
+        guard let token = UserSession.shared.accessToken else { return }
+        self.repository.getAllContents(token: token) { homeData in
+          DispatchQueue.main.async {
+            self.view.window?.rootViewController = KeyneezTabbarController(data: homeData)
+          }
         }
       case .failure(let error):
         self.view.makeToast("잘못된 비밀번호 입니다.       \n다시 입력해주세요.", duration: 0.8, position: .center)
