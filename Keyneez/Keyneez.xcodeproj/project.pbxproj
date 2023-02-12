@@ -81,6 +81,11 @@
 		B14D109F2959C79A0004946F /* KeyneezUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14D109E2959C79A0004946F /* KeyneezUITests.swift */; };
 		B14D10A12959C79A0004946F /* KeyneezUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14D10A02959C79A0004946F /* KeyneezUITestsLaunchTests.swift */; };
 		B14D10AF2959CA080004946F /* KeyneezTabbarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14D10AE2959CA080004946F /* KeyneezTabbarController.swift */; };
+		B15261A62999345D00BCA55D /* CameraRealTimeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15261A52999345D00BCA55D /* CameraRealTimeDelegate.swift */; };
+		B15261A82999360A00BCA55D /* ImageCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15261A72999360A00BCA55D /* ImageCropper.swift */; };
+		B15261AA2999364C00BCA55D /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15261A92999364C00BCA55D /* ImageResizer.swift */; };
+		B15261AC2999399500BCA55D /* Extension+CMSampleBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15261AB2999399500BCA55D /* Extension+CMSampleBuffer.swift */; };
+		B15261AE29993BCB00BCA55D /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15261AD29993BCB00BCA55D /* ImageSaver.swift */; };
 		B1812357296B001B0029FEB6 /* UIImage+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1812356296B001B0029FEB6 /* UIImage+Extension.swift */; };
 		B181235A296B2EF20029FEB6 /* IDCardGuideViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1812359296B2EF20029FEB6 /* IDCardGuideViewController.swift */; };
 		B181235C296B30CB0029FEB6 /* IDCardGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B181235B296B30CB0029FEB6 /* IDCardGuideView.swift */; };
@@ -252,6 +257,11 @@
 		B14D109E2959C79A0004946F /* KeyneezUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyneezUITests.swift; sourceTree = "<group>"; };
 		B14D10A02959C79A0004946F /* KeyneezUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyneezUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		B14D10AE2959CA080004946F /* KeyneezTabbarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyneezTabbarController.swift; sourceTree = "<group>"; };
+		B15261A52999345D00BCA55D /* CameraRealTimeDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraRealTimeDelegate.swift; sourceTree = "<group>"; };
+		B15261A72999360A00BCA55D /* ImageCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCropper.swift; sourceTree = "<group>"; };
+		B15261A92999364C00BCA55D /* ImageResizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageResizer.swift; sourceTree = "<group>"; };
+		B15261AB2999399500BCA55D /* Extension+CMSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+CMSampleBuffer.swift"; sourceTree = "<group>"; };
+		B15261AD29993BCB00BCA55D /* ImageSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
 		B1812356296B001B0029FEB6 /* UIImage+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Extension.swift"; sourceTree = "<group>"; };
 		B1812359296B2EF20029FEB6 /* IDCardGuideViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDCardGuideViewController.swift; sourceTree = "<group>"; };
 		B181235B296B30CB0029FEB6 /* IDCardGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDCardGuideView.swift; sourceTree = "<group>"; };
@@ -561,6 +571,11 @@
 				B1A80364296DD6430007DDD9 /* CameraViewActions.swift */,
 				B18C2BB9296F267C00A9AA1B /* UIUtilities.swift */,
 				B18C2BBB296FF0B600A9AA1B /* OCRService.swift */,
+				B15261A52999345D00BCA55D /* CameraRealTimeDelegate.swift */,
+				B15261A72999360A00BCA55D /* ImageCropper.swift */,
+				B15261A92999364C00BCA55D /* ImageResizer.swift */,
+				B15261AB2999399500BCA55D /* Extension+CMSampleBuffer.swift */,
+				B15261AD29993BCB00BCA55D /* ImageSaver.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -1293,6 +1308,7 @@
 				B8C02F052962F5D4005612CE /* SettingViewController.swift in Sources */,
 				B1A80363296DA9A40007DDD9 /* IDIssuedViewActionables.swift in Sources */,
 				0233C6F8296C07A300A177E9 /* JellyProductCollectionViewCell.swift in Sources */,
+				B15261A62999345D00BCA55D /* CameraRealTimeDelegate.swift in Sources */,
 				B18B60D2296552DA00AF14F5 /* NiblessViewController.swift in Sources */,
 				B10AAD64296967F300AB8475 /* BenefitCollectionViewCell.swift in Sources */,
 				B10AAD8E2969CA4700AB8475 /* PhotoCaptureDelegate.swift in Sources */,
@@ -1336,6 +1352,7 @@
 				0230ADCC296EB58F0079D799 /* ProductPwdRequestDto.swift.swift in Sources */,
 				B10AAD61296967F300AB8475 /* IDCardContentView.swift in Sources */,
 				B8C02F0B2962F65E005612CE /* HomeViewController.swift in Sources */,
+				B15261A82999360A00BCA55D /* ImageCropper.swift in Sources */,
 				B8FC6640297057A400AEE9C3 /* UILabel+Extension.swift in Sources */,
 				0230ADD3296EB7D70079D799 /* PasswordFetchResponseDto.swift in Sources */,
 				B187CA71296C096F006B0AE1 /* CameraMode.swift in Sources */,
@@ -1347,10 +1364,12 @@
 				B1A8037C296E9DB60007DDD9 /* NetworkLoggerPlugin.swift in Sources */,
 				B8C844BE296EB0A100E88B86 /* ContentDetailResponseDto.swift in Sources */,
 				B8C844C6296EB41100E88B86 /* MyLikedContentResponseDto.swift in Sources */,
+				B15261AC2999399500BCA55D /* Extension+CMSampleBuffer.swift in Sources */,
 				B10AAD3F296967C700AB8475 /* BottomSheetViewController.swift in Sources */,
 				B10AAD3D296967C700AB8475 /* UIView+Extension.swift in Sources */,
 				B8C02F46296D5ED2005612CE /* HomeSearchModel.swift in Sources */,
 				B18C2BBA296F267C00A9AA1B /* UIUtilities.swift in Sources */,
+				B15261AE29993BCB00BCA55D /* ImageSaver.swift in Sources */,
 				B14D10802959C7980004946F /* SceneDelegate.swift in Sources */,
 				B8C844CC296EBA0B00E88B86 /* EditUserRequestDto.swift in Sources */,
 				B187CA6F296C07CF006B0AE1 /* IDCardGuideActions.swift in Sources */,
@@ -1403,6 +1422,7 @@
 				B10AAD6D296967F300AB8475 /* IDDetailActionables.swift in Sources */,
 				B1A8035B296D98E70007DDD9 /* PhysicalIDActionables.swift in Sources */,
 				B10AAD902969F31C00AB8475 /* AVCaptureVideoOrientation.swift in Sources */,
+				B15261AA2999364C00BCA55D /* ImageResizer.swift in Sources */,
 				B1A8035D296D99180007DDD9 /* PhysicalIDActions.swift in Sources */,
 				B8C844CA296EB7F900E88B86 /* EditUserResponseDto.swift in Sources */,
 				022F68B82962D3A200F32CE1 /* Buildable.swift in Sources */,

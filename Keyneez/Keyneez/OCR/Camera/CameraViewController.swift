@@ -278,9 +278,9 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     camera.lastFrame = sampleBuffer
-    let ciimage = convert(sampleBuffer)
+    let ciimage = sampleBuffer.convertToCIImage()
     let tempImage = UIImage(ciImage: ciimage)
-    let newCropped = makeCroppedImage(image: tempImage)
+    let newCropped = ImageCropper.makeCroppedImage(image: tempImage, regionOfInterestSize: regionOfInterestSize)
     
     let visionImage = VisionImage(image: newCropped)
     let orientation = UIUtilities.imageOrientation(
@@ -302,97 +302,14 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
   }
   
-  private func makeCroppedImage(image: UIImage) -> UIImage {
-    var image = UIImage(cgImage: resizeImage(image: image, size: image.size))
-    let deviceScreen = UIScreen.main.bounds.size
-    let newy = regionOfInterestSize.origin.y / deviceScreen.height * image.size.height
-    let cardHeightInPhoto = regionOfInterestSize.height / deviceScreen.height * image.size.height
-    let cardWidthInPhoto = cardHeightInPhoto * regionOfInterestSize.width / regionOfInterestSize.height
-    let newx = image.size.width / 2 - cardWidthInPhoto / 2
-    let cropped = image.cgImage?.cropping(to: CGRect(x: newx, y: newy, width: cardWidthInPhoto, height: cardHeightInPhoto))
-    return UIImage(cgImage: cropped!, scale: image.scale, orientation: image.imageOrientation)
-  }
   
   func processWhenSuccessOCRAuto(image: UIImage, text: [String],  name: Int) {
     // Text Process
     DispatchQueue.main.async {
       self.actions.OCRConfirmed(with: self.customNavigationDelegate, height: 520, heightIncludeKeyboard: 690, text: text, image: image)
-      self.saveImage(image: image, name: 4)
+      ImageSaver.saveImage(image: image, name: 4)
       self.camera.session.stopRunning()
     }
   }
 }
 
-// MARK: - Save, Resize, BufferToCIImage
-
-extension CameraViewController {
-  
-  func saveImage(image: UIImage, name: Int) -> Bool {
-          guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
-              return false
-          }
-          guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
-              return false
-          }
-          do {
-              try data.write(to: directory.appendingPathComponent("profile\(name).png")!)
-              return true
-          } catch {
-              print(error.localizedDescription)
-              return false
-          }
-      }
-  
-  private func resizeImage(image: UIImage, size: CGSize) -> CGImage {
-    UIGraphicsBeginImageContext(size)
-    image.draw(in:CGRect(x: 0, y: 0, width: size.width, height:size.height))
-    let renderImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-    
-    guard let resultImage = renderImage?.cgImage else {
-      print("image resizing error")
-      return UIImage().cgImage!
-    }
-    return resultImage
-  }
-  
-  private func convert(_ sampleBuffer: CMSampleBuffer) -> CIImage {
-    let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-    CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
-    
-    let baseAddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0)!
-    let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-    let width = CVPixelBufferGetWidth(pixelBuffer)
-    let height = CVPixelBufferGetHeight(pixelBuffer)
-    
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    
-    let newContext = CGContext(data: baseAddress,
-                               width: width,
-                               height: height,
-                               bitsPerComponent: 8,
-                               bytesPerRow: bytesPerRow,
-                               space: colorSpace,
-                               bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
-    
-    let imageRef = newContext.makeImage()!
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-    
-    var output = CIImage(cgImage: imageRef)
-    
-    var transform = output.orientationTransform(forExifOrientation: 6) // UIImageOrientation.right
-    output = output.transformed(by: transform)
-    
-    let ratio = output.extent.size.width / output.extent.size.width
-    transform = output.orientationTransform(forExifOrientation: 1)
-    transform = transform.scaledBy(x: ratio, y: ratio)
-    output = output.transformed(by: transform)
-    
-    transform = output.orientationTransform(forExifOrientation: 1)
-    transform = transform.translatedBy(x: 0, y: -(output.extent.size.height - output.extent.size.height) / 2)
-    output = output.transformed(by: transform)
-    
-    return output.cropped(to: CGRect(origin: CGPoint.zero, size: output.extent.size))
-  }
-  
-}
