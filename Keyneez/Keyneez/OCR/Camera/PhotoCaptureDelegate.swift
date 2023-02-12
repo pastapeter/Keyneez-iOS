@@ -18,8 +18,6 @@ class PhotoCaptureProcessor: NSObject {
   
   private let willCapturePhotoAnimation: () -> Void
   
-  private let livePhotoCaptureHandler: (Bool) -> Void
-  
   lazy var context = CIContext()
   
   private let completionHandler: (PhotoCaptureProcessor) -> Void
@@ -30,29 +28,19 @@ class PhotoCaptureProcessor: NSObject {
   
   private var photoData: Data?
   
-  private var livePhotoCompanionMovieURL: URL?
-  
-  private var portraitEffectsMatteData: Data?
-  
-  private var semanticSegmentationMatteDataArray = [Data]()
   private var maxPhotoProcessingTime: CMTime?
   
-  
-  
   // Save the location of captured photos
-  var location: CLLocation?
   var koreanOptions = KoreanTextRecognizerOptions()
   
   init(with requestedPhotoSettings: AVCapturePhotoSettings,
        willCapturePhotoAnimation: @escaping () -> Void,
-       livePhotoCaptureHandler: @escaping (Bool) -> Void,
        completionHandler: @escaping (PhotoCaptureProcessor) -> Void,
        photoProcessingHandler: @escaping (Bool) -> Void,
        OCRCompletionHandler: @escaping ([String], UIImage) -> Void
   ) {
     self.requestedPhotoSettings = requestedPhotoSettings
     self.willCapturePhotoAnimation = willCapturePhotoAnimation
-    self.livePhotoCaptureHandler = livePhotoCaptureHandler
     self.completionHandler = completionHandler
     self.photoProcessingHandler = photoProcessingHandler
     self.OCRCompletionHandler = OCRCompletionHandler
@@ -71,9 +59,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
   
   /// - Tag: WillBeginCapture
   func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-    if resolvedSettings.livePhotoMovieDimensions.width > 0 && resolvedSettings.livePhotoMovieDimensions.height > 0 {
-      livePhotoCaptureHandler(true)
-    }
     maxPhotoProcessingTime = resolvedSettings.photoProcessingTimeRange.start + resolvedSettings.photoProcessingTimeRange.duration
   }
   
@@ -110,7 +95,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         guard let self = self else {return}
         let visionImage = VisionImage(image: newCropped)
         OCRService().recognizeTextWithManual(in: visionImage, with: newCropped, width: newCropped.size.width, height: newCropped.size.height) { text, image in
-          self.saveImage(image: image, name: 2)
           self.OCRCompletionHandler(text, image)
         }
 
@@ -118,22 +102,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     }
     
   }
-  
-  func saveImage(image: UIImage, name: Int) -> Bool {
-          guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
-              return false
-          }
-          guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
-              return false
-          }
-          do {
-              try data.write(to: directory.appendingPathComponent("profile\(name).png")!)
-              return true
-          } catch {
-              print(error.localizedDescription)
-              return false
-          }
-      }
   
   private func makeCroppedImage(image: UIImage) -> UIImage {
     var image = UIImage(cgImage: resizeImage(image: image, size: image.size))
@@ -144,20 +112,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     let newx = image.size.width / 2 - cardWidthInPhoto / 2
     let cropped = image.cgImage?.cropping(to: CGRect(x: newx, y: newy, width: cardWidthInPhoto, height: cardHeightInPhoto))
     return UIImage(cgImage: cropped!, scale: image.scale, orientation: image.imageOrientation)
-  }
-  
-  /// - Tag: DidFinishRecordingLive
-  func photoOutput(_ output: AVCapturePhotoOutput, didFinishRecordingLivePhotoMovieForEventualFileAt outputFileURL: URL, resolvedSettings: AVCaptureResolvedPhotoSettings) {
-    livePhotoCaptureHandler(false)
-  }
-  
-  /// - Tag: DidFinishProcessingLive
-  func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingLivePhotoToMovieFileAt outputFileURL: URL, duration: CMTime, photoDisplayTime: CMTime, resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-    if error != nil {
-      print("Error processing Live Photo companion movie: \(String(describing: error))")
-      return
-    }
-    livePhotoCompanionMovieURL = outputFileURL
   }
   
   /// - Tag: DidFinishCapture
@@ -199,3 +153,4 @@ extension CGImage {
     return mutableData as Data
   }
 }
+
