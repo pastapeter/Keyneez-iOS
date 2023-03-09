@@ -104,21 +104,24 @@ final class OCRService: TextRecognizable {
     }
     var sortedArr = textDict.sorted(by: { $0.value > $1.value })
     // 2개 미만일 경우 Flush
-    var newArr = sortedArr.map { $0.key }
-    if newArr.count < 2 {
+    var newArr = sortedArr.enumerated().map { return ($0.element.key, $0.offset) }
+    var OCRResultwithDuplicatedOrder = newArr.map { $0.0 }
+    var OrderOfIndexWithDuplicatedOrder = newArr.map { $0.1}
+    if OCRResultwithDuplicatedOrder.count < 2 {
       completion()
       return
     }
     // 2개일 경우,
-    if newArr.count < 3 {
-      newArr.append("")
+    if OCRResultwithDuplicatedOrder.count < 3 {
+      OCRResultwithDuplicatedOrder.append("")
     }
     
-    newArr = Array(newArr[0..<3])
+    OCRResultwithDuplicatedOrder = Array(OCRResultwithDuplicatedOrder[0..<3])
   
-    if checkTeenID(in: newArr) || checkSchool(in: newArr) {
-      bufferQueue.sync {
-        success(newArr, imageBuffer[5])
+    if checkTeenID(in: OCRResultwithDuplicatedOrder) || checkSchool(in: OCRResultwithDuplicatedOrder) {
+      bufferQueue.async(flags:.barrier) { [weak self] in
+        guard let self else {return}
+        success(OCRResultwithDuplicatedOrder, self.imageBuffer[OrderOfIndexWithDuplicatedOrder.first ?? sortedArr.count - 1])
       }
       completion()
       return
